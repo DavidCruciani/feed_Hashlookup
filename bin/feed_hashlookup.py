@@ -43,7 +43,7 @@ if __name__ == '__main__':
         vmName = file.split(".")[0]
         print(f"VM: {vmName}")
 
-        res = runningVms()
+        """res = runningVms()
 
         request = [allVariables.VBoxManage, 'startvm', allVariables.WindowsVM, '--type', 'headless']
         if not allVariables.WindowsVM in res.stdout.decode():
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             print("\rTime spent: %s min" % (cptime), end="")
             res = runningVms()
 
-        print("\n[+] Windows stop\n")
+        print("\n[+] Windows stop\n")"""
 
 
         ## Convert windows machine into raw format
