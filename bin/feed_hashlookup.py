@@ -118,7 +118,6 @@ if __name__ == '__main__':
                             nameFile += l[inter] + "/"
                         nameFile = nameFile[:-1]
 
-
                         data.append(
                             {
                                 'FileName': nameFile.rstrip("\n"),
@@ -133,6 +132,22 @@ if __name__ == '__main__':
                                 'ssdeep': ssdeepGlob
                             }
                         )
+
+                        list_sha = list()
+                        i = 0
+                        while i != 6:
+                            list_sha.append(sha1Glob[i] + sha1Glob[i+1])
+                            i+=2
+                        # print(list_sha)
+
+                        path = os.path.join(allVariables.pathToFeedHashlookup, "export")
+                        if not os.path.isdir(path):
+                            os.mkdir(path)
+                        for element in list_sha:
+                            path = os.path.join(path, element)
+                            if not os.path.isdir(path):
+                                os.mkdir(path)
+                        shutil.copy(filename, path)
                     except OSError as err:
                         #print(err)
                         pass
