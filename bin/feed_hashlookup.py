@@ -44,7 +44,8 @@ if __name__ == '__main__':
         print(f"VM: {vmName}")
 
         exportPath = os.path.join(allVariables.pathToFeedHashlookup, vmName)
-
+        if not os.path.isdir(exportPath):
+            os.mkdir(exportPath)
 
         ## Convert windows machine into raw format
         convert_file = "%s%s.img" %(allVariables.pathToConvert, vmName)
