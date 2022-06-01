@@ -43,28 +43,7 @@ if __name__ == '__main__':
         vmName = file.split(".")[0]
         print(f"VM: {vmName}")
 
-        """res = runningVms()
-
-        request = [allVariables.VBoxManage, 'startvm', allVariables.WindowsVM, '--type', 'headless']
-        if not allVariables.WindowsVM in res.stdout.decode():
-            ## Start windows machine
-            print("[+] Windows Start")
-            callSubprocessPopen(request)
-        else:
-            print("[+] Windows Running")
-
-        ## Wait windows machine to shutdown
-        res = runningVms()
-
-        ## Output to see the time that the windows machine is running
-        cptime = 0
-        while allVariables.WindowsVM in res.stdout.decode():
-            time.sleep(60)
-            cptime += 1
-            print("\rTime spent: %s min" % (cptime), end="")
-            res = runningVms()
-
-        print("\n[+] Windows stop\n")"""
+        exportPath = os.path.join(allVariables.pathToFeedHashlookup, vmName)
 
 
         ## Convert windows machine into raw format
@@ -137,10 +116,9 @@ if __name__ == '__main__':
                         i = 0
                         while i != 6:
                             list_sha.append(sha1Glob[i] + sha1Glob[i+1])
-                            i+=2
-                        # print(list_sha)
+                            i += 2
 
-                        path = os.path.join(allVariables.pathToFeedHashlookup, "export")
+                        path = os.path.join(exportPath, "export")
                         if not os.path.isdir(path):
                             os.mkdir(path)
                         for element in list_sha:
@@ -152,7 +130,7 @@ if __name__ == '__main__':
                         #print(err)
                         pass
 
-        with open(allVariables.pathToFeedHashlookup + "/" + vmName + ".json", 'w') as outfile:
+        with open(exportPath + "/" + vmName + ".json", 'w') as outfile:
             ndjson.dump(data, outfile)
 
         os.remove(intermediate_file)
