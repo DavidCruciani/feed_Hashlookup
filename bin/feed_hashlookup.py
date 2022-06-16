@@ -1,10 +1,10 @@
 import os
 import re
 import sys
-import time
 import ndjson
 import shutil
 import subprocess
+import argparse
 import pathlib
 pathProg = pathlib.Path(__file__).parent.absolute()
 pathWork = ""
@@ -31,12 +31,15 @@ def callSubprocessPopen(request, shellUse = False):
 
 # Get the list of running vms
 def runningVms():
-    req = [allVariables.VBoxManage, "list", "runningvms"]
+    req = ["VBoxManage", "list", "runningvms"]
     return subprocess.run(req, capture_output=True)
 
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--export_file", help="Export all file from the VM to the PC", action="store_true")
+    args = parser.parse_args()
 
     for file in os.listdir(allVariables.pathToWindowsVM):
         vmPath = os.path.join(allVariables.pathToWindowsVM, file)
@@ -51,10 +54,13 @@ if __name__ == '__main__':
                 os.mkdir(exportPath)
 
             ## Convert windows machine into raw format
-            convert_file = "%s%s.img" %(allVariables.pathToConvert, vmName)
+            pathToConvert = os.path.join(allVariables.pathToWindowsVM, "convert")
+            if not os.path.isdir(pathToConvert):
+                os.mkdir(pathToConvert)
+            convert_file = "%s%s.img" %(pathToConvert, vmName)
 
             print("## Convertion ##")
-            res = subprocess.call([allVariables.VBoxManage, "clonehd", vmPath, convert_file, "--format", "raw"])
+            res = subprocess.call(["VBoxManage", "clonehd", vmPath, convert_file, "--format", "raw"])
             print("## Convertion Finish ##\n")
 
             ## create mount directory
@@ -116,20 +122,21 @@ if __name__ == '__main__':
                                 }
                             )
 
-                            list_sha = list()
-                            i = 0
-                            while i != 6:
-                                list_sha.append(sha1Glob[i] + sha1Glob[i+1])
-                                i += 2
+                            if args.export_file:
+                                list_sha = list()
+                                i = 0
+                                while i != 6:
+                                    list_sha.append(sha1Glob[i] + sha1Glob[i+1])
+                                    i += 2
 
-                            path = os.path.join(exportPath, "export")
-                            if not os.path.isdir(path):
-                                os.mkdir(path)
-                            for element in list_sha:
-                                path = os.path.join(path, element)
+                                path = os.path.join(exportPath, "export")
                                 if not os.path.isdir(path):
                                     os.mkdir(path)
-                            shutil.copy(filename, path)
+                                for element in list_sha:
+                                    path = os.path.join(path, element)
+                                    if not os.path.isdir(path):
+                                        os.mkdir(path)
+                                shutil.copy(filename, path)
                         except OSError as err:
                             #print(err)
                             pass
@@ -147,7 +154,7 @@ if __name__ == '__main__':
                 
             ## Suppression of the current raw disk
             os.remove(convert_file)
-            request = [allVariables.VBoxManage, "closemedium", "disk", convert_file, "--delete"]
+            request = ["VBoxManage", "closemedium", "disk", convert_file, "--delete"]
             callSubprocessPopen(request)
 
     ## Suppression of mount folder
@@ -155,4 +162,8 @@ if __name__ == '__main__':
         shutil.rmtree(pathMnt)
     except:
         pass
-    
+    ## Suppression of mount folder
+    try:
+        shutil.rmtree(pathToConvert)
+    except:
+        pass
