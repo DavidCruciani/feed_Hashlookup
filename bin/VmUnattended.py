@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 import pathlib
 pathProg = pathlib.Path(__file__).parent.absolute()
 pathWork = ""
@@ -9,6 +10,11 @@ for i in re.split(r"/|\\", str(pathProg))[:-1]:
 sys.path.append(pathWork + "etc")
 import allVariables
 import subprocess
+
+# Get the list of running vms
+def runningVms():
+    req = ["VBoxManage", "list", "runningvms"]
+    return subprocess.run(req, capture_output=True)
 
 for file in os.listdir(allVariables.pathToWindowsIsoFolder):
     vmPath = os.path.join(allVariables.pathToWindowsIsoFolder, file)
@@ -26,3 +32,16 @@ for file in os.listdir(allVariables.pathToWindowsIsoFolder):
         p = subprocess.Popen(request, stdout=subprocess.PIPE)
         (output, err) = p.communicate()
         p_status = p.wait()
+
+        ## Wait windows machine to shutdown
+        res = runningVms()
+
+        ## Output to see the time that the windows machine is running
+        cptime = 0
+        while vmName in res.stdout.decode():
+            time.sleep(300)
+            cptime += 5
+            print("\rTime spent: %s min" % (cptime), end="")
+            res = runningVms()
+
+        print("\n[+] Windows stop\n")
