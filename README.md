@@ -8,14 +8,11 @@ The goal of this repository is to get the hash of all files in a Windows machine
 
 ## Requirements
 
-- [pyautogui](https://github.com/asweigart/pyautogui)
 - [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads)
-- [FreeRDP](https://doc.ubuntu-fr.org/freerdp)
 - ssdeep
   - On Ubuntu:
     - `sudo apt-get install build-essential libffi-dev python3 python3-dev python3-pip libfuzzy-dev`
     - `pip install ssdeep`
-
 - python-tlsh
 
 ## VM creation
@@ -24,36 +21,36 @@ The first step, is to create VM from iso file.
 
 - Download iso [here](https://www.microsoft.com/software-download/windows11)
 - Name the iso like the name you will give to your VM: `Win11_en.iso`, `Win11_en.vdi`
-- List the VM name in `etc/listVM.txt`.  Ex: `Win11_en`
-- Run `bin/Vm11Creator`
+- fill the first line of  `etc/allVariables.py`
+- Run `bin/VmUnattended.py`
+
+VM will be created using the script `bin/Vm11Creator`
+
+
 
 #### Usage
 
-~~~bash
-./VmCreator name_of_the_vm 
-./VmCreator name_of_the_vm del # delete the VM based on the name give in first 
-~~~
+~~~~bash
+dacru@dacru:~/github/feed_Hashlookup/bin$ ./Vm11Creator vmName isoPath vdipath
+~~~~
 
-Now the VM is created 
+`vmName` : Name that the VM will have
+
+`isoPath` :  Path to the iso to use during the installation
+
+`vdipath` : Path to the vdi to use for the VM
 
 
 
-## ISO Installation
+#### Note
 
-- Open a new tab
-- If the VM will be execute on a remote server:
-  - connect to the server with a tunnel: `ssh -l username server -L localport:server:3389`
-- Else do nothing and leave the tab open
-
-- Run `bin/vmCreation.py`
-- Don't click somewhere with your mouse or the focus on the VM will be lost and the program will not work
-- It's better to not use your PC during the execution
+`bin/Vm11Creator` is called by `bin/VmUnattended`, so it's very important to fill the first line of `etc/allVariables.py`. The program will do the work.
 
 
 
 ## Feed Hashlookup
 
-- Run a VM you create and do `systeminfo`  in a terminal and write in a file:
+- Run a created VM, do `systeminfo`  in a terminal and write in a file:
   - System version.    Ex: `10.0.22000 N/A Build 22000`
   - Name of the os.    Ex: `Microsoft Windows 11 Pro`
 - Fill `etc/allVariables`

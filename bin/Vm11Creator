@@ -2,30 +2,36 @@
 
 if [ ! -z $1 ]
 then
-        if [ ! -z $2 ] && [ $2 == "del" ]
+        if [ ! -z $2 ]
         then
-		VBoxManage modifyvm $1 --hdd none
-		VBoxManage unregistervm $1 -delete
-	else
-		VBoxManage createvm --name $1 --ostype Windows11_64 --register
-		echo
-		VBoxManage modifyvm $1 --cpus 6 --memory 16000 --vram 128
+                if [ $2 == "del" ]
+                then
+                        VBoxManage modifyvm $1 --hdd none
+                        VBoxManage unregistervm $1 -delete
+                else
+                        if [ ! -z $3 ]
+                        then
+                                VBoxManage createvm --name $1 --ostype Windows11_64 --register
+                                echo
+                                VBoxManage modifyvm $1 --cpus 6 --memory 16000 --vram 128
 
-		VBoxManage modifyvm $1 --nic1 nat
+                                VBoxManage modifyvm $1 --nic1 nat
 
-		VBoxManage createhd --filename ./Windows11/$1.vdi --size 52000 --variant Standard 
+                                VBoxManage createhd --filename $3/$1.vdi --size 52000 --variant Standard
 
-		VBoxManage storagectl $1 --name "SATA Controller" --add sata --bootable on
+                                VBoxManage storagectl $1 --name "SATA Controller" --add sata --bootable on
 
-		VBoxManage storageattach $1 --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium Windows11/$1.vdi
+                                VBoxManage storageattach $1 --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $3/$1.vdi
 
-		VBoxManage storagectl $1 --name "IDE Controller" --add ide
-		VBoxManage storageattach $1 --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ./$1.iso
-
-		VBoxManage setproperty vrdeauthlibrary "VBoxAuthSimple"
-		VBoxManage modifyvm $1 --vrdeauthtype null
-		VBoxManage modifyvm $1 --vrde on --vrdeport 3389
-	fi
+                                VBoxManage setproperty vrdeauthlibrary "VBoxAuthSimple"
+                                VBoxManage modifyvm $1 --vrdeauthtype null
+                                VBoxManage modifyvm $1 --vrde on --vrdeport 3389
+                                VBoxManage unattended install $1 --iso $2 --user=Bob --no-install-txs --no-install-additions --post-install-command="shutdown /s /t 180"
+                        else
+                                echo "no path to create vdi"
+                        fi
+                fi
+        fi
 else
         echo "miss Name of VM"
 fi

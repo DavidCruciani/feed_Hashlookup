@@ -17,16 +17,18 @@ def runningVms():
     return subprocess.run(req, capture_output=True)
 
 for file in os.listdir(allVariables.pathToWindowsIsoFolder):
-    vmPath = os.path.join(allVariables.pathToWindowsIsoFolder, file)
+    isoPath = os.path.join(allVariables.pathToWindowsIsoFolder, file)
     vmName = file.split(".")[0]
 
-    if not os.path.isdir(vmPath):
+    if not os.path.isdir(isoPath):
         print(f"VM: {vmName}")
         pathToVdi = os.path.join(allVariables.pathToWindowsIsoFolder, "vdi")
         if not os.path.isdir(pathToVdi):
             os.mkdir(pathToVdi)
-        request = ["./Vm11Creator", vmName, vmPath, pathToVdi]
+        request = ["./Vm11Creator", vmName, isoPath, pathToVdi]
         subprocess.call(request)
+
+        print("[+] Windows Start")
 
         request = ["VBoxManage", "startvm", vmName, "--type", "headless"]
         p = subprocess.Popen(request, stdout=subprocess.PIPE)
