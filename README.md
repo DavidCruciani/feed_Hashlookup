@@ -4,8 +4,6 @@ This project aim to feed an other project named [Hashlookup](https://github.com/
 
 The goal of this repository is to get the hash of all files in a Windows machine, to feed the database of Hashlookup with million of hash completely safe.
 
-
-
 ## Requirements
 
 - [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads)
@@ -21,18 +19,24 @@ The first step, is to create VM from iso file.
 
 - Download iso [here](https://www.microsoft.com/software-download/windows11)
 - Name the iso like the name you will give to your VM: `Win11_en.iso`, `Win11_en.vdi`
-- fill the first line of  `etc/allVariables.py`
+- fill the first line of  `config/config.cfg`
 - Run `bin/VmUnattended.py`
 
 VM will be created using the script `bin/Vm11Creator`
 
 
 
+to add in `win_postinstall` locate : `/usr/share/virtualbox/UnattendedTemplates`
+
+```
+reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f
+```
+
 #### Usage
 
-~~~~bash
+```bash
 dacru@dacru:~/github/feed_Hashlookup/bin$ ./Vm11Creator vmName isoPath vdipath
-~~~~
+```
 
 `vmName` : Name that the VM will have
 
@@ -40,13 +44,9 @@ dacru@dacru:~/github/feed_Hashlookup/bin$ ./Vm11Creator vmName isoPath vdipath
 
 `vdipath` : Path to the vdi to use for the VM
 
-
-
 #### Note
 
 `bin/Vm11Creator` is called by `bin/VmUnattended`, so it's very important to fill the first line of `etc/allVariables.py`. The program will do the work.
-
-
 
 ## Feed Hashlookup
 
@@ -58,12 +58,11 @@ dacru@dacru:~/github/feed_Hashlookup/bin$ ./Vm11Creator vmName isoPath vdipath
 
 #### Usage
 
-~~~bash
+```bash
 dacru@dacru:~/github/feed_Hashlookup/bin$ python3 feed_hashlookup.py -h
 usage: feed_hashlookup.py [-h] [-e]
 
 optional arguments:
   -h, --help         show this help message and exit
   -e, --export_file  Export all file from the VM to the PC
-~~~
-
+```

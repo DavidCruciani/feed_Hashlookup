@@ -1,0 +1,4 @@
+
+*.pyc
+config/config.cfg
+bin/VmUnattended.log
