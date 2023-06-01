@@ -1,5 +1,6 @@
-[iso]
-path = 
+[vm]
+iso_path = 
+vdi_path = 
 
 [hashlookup]
 path = 
