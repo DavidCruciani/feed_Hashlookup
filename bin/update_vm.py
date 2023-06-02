@@ -46,8 +46,12 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
             ## Get system information for hashlookup
             request_sysinfo = ["vboxmanage", "guestcontrol", vm_name, "run", "cmd.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "/c", "systeminfo"]
             s = subprocess.run(request_sysinfo, capture_output=True)
-            SystemVersion = s.stdout.decode("cp850").split("\n")[3]
-            SystemName = s.stdout.decode("cp850").split("\n")[2]
+            print(s.stdout)
+            try:
+                SystemVersion = s.stdout.decode("cp850").split("\n")[3]
+                SystemName = s.stdout.decode("cp850").split("\n")[2]
+            except:
+                continue
 
             x = re.search(r" {2,}(?P<version>.*)", SystemVersion)
             y = re.search(r" {2,}(?P<name>.*)", SystemName)
