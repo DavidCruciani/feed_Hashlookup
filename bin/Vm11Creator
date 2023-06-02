@@ -13,7 +13,7 @@ then
 			then
 				VBoxManage createvm --name $1 --ostype $4 --register
 				echo
-				VBoxManage modifyvm $1 --cpus 6 --memory 16000 --vram 128
+				VBoxManage modifyvm $1 --cpus 4 --memory 8192 --vram 64
 
 				VBoxManage modifyvm $1 --nic1 nat
 
