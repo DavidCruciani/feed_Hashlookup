@@ -7,6 +7,7 @@ import ssdeep
 import tlsh
 import datetime
 import io
+import time
 
 
 def callSubprocessPopen(request, shellUse = False):
@@ -66,9 +67,13 @@ def get_all_hashes(vdi_folder, vm_path, vm_name, feeder_path, sysinfo_path):
         os.mkdir(pathToConvert)
     convert_file = f"{pathToConvert}/{vm_name}.img"
 
-    print("## Convertion ##")
+    print("## Conversion ##")
     res = subprocess.call(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"])
-    print("## Convertion Finish ##\n")
+    while res.stderr:
+        print("[-] Conversion error")
+        time.sleep(10)
+        res = subprocess.call(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"])
+    print("## Conversion Finish ##\n")
 
     ## create mount directory
     pathMnt = "./mnt_convert"
