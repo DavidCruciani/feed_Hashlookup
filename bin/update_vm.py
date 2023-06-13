@@ -6,7 +6,7 @@ import datetime
 def write_to_log(log_file, msg):
     log_file.write(f"\n{datetime.datetime.now()}: {msg}")
 
-def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
+def update_vm(vm_name, path_os_vdi, log_file, os_type, installation_flag=False):
     print("[+] Start for update")
     write_to_log(log_file, f"Start {vm_name} for update")
     request = ["VBoxManage", "startvm", vm_name, "--type", "headless"]
@@ -15,6 +15,8 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
     print("[+] Try to update...")
     need_wait = True
     ## Execute all powershell commands needed to run updates
+    # if os_type == "Windows2016" or os_type == "Windows2019":
+
     if installation_flag:
         command = '(Install-PackageProvider -Name NuGet -Force ); (Install-Module PSWindowsUpdate -Force); (Set-ExecutionPolicy Unrestricted -Force); (Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)'
     else:
@@ -46,7 +48,7 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
             ## Get system information for hashlookup
             request_sysinfo = ["vboxmanage", "guestcontrol", vm_name, "run", "cmd.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "/c", "systeminfo"]
             s = subprocess.run(request_sysinfo, capture_output=True)
-            print(s.stdout)
+            # print(s.stdout)
             try:
                 SystemVersion = s.stdout.decode("cp850").split("\n")[3]
                 SystemName = s.stdout.decode("cp850").split("\n")[2]

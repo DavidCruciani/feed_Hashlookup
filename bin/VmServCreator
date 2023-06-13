@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ ! -z $1 ]
+then
+	if [ ! -z $2 ]
+	then
+		if [ $2 == "del" ]
+		then
+			VBoxManage modifyvm $1 --hdd none
+			VBoxManage unregistervm $1 -delete
+		else
+			if [ ! -z $3 ] && [ ! -z $4 ]
+			then
+				VBoxManage createvm --name $1 --ostype $4 --register
+				echo
+				VBoxManage modifyvm $1 --cpus 4 --memory 8192 --vram 64
+
+				VBoxManage modifyvm $1 --nic1 nat
+
+				VBoxManage createhd --filename $3/$1.vdi --size 36000 --variant Standard
+
+				VBoxManage storagectl $1 --name "SATA Controller" --add sata --bootable on
+
+				VBoxManage storageattach $1 --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $3/$1.vdi
+
+				VBoxManage setproperty vrdeauthlibrary "VBoxAuthSimple"
+				VBoxManage modifyvm $1 --vrdeauthtype null
+				VBoxManage modifyvm $1 --vrde on --vrdeport 3389
+				VBoxManage unattended install $1 --iso $2 --user=John --password=John --install-additions --additions-iso="/usr/share/virtualbox/VBoxGuestAdditions.iso" --script-template="unattend_2016.xml" --post-install-command="shutdown /s /t 60"
+			else
+				echo "no path to create vdi or no os type"
+			fi
+		fi
+	fi
+else
+        echo "miss Name of VM"
+fi
