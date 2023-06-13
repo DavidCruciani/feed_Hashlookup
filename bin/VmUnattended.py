@@ -41,6 +41,15 @@ if not os.path.isdir(vdi_path):
     os.mkdir(vdi_path)
 
 
+try:
+    with open("ignored_vms", "r") as read_file:
+        ignored_vms = read_file.readlines()
+except:
+    ignored_vms = []
+
+for i in range(0, len(ignored_vms)):
+    ignored_vms[i] = ignored_vms[i].rstrip()
+
 
 
 
@@ -56,11 +65,10 @@ def runningVms():
 
 
 
-
 ## List all iso files
 for file in os.listdir(iso_path):
-    isoPath = os.path.join(iso_path, file)
-    if not os.path.isdir(isoPath):
+    iso_vm_Path = os.path.join(iso_path, file)
+    if not os.path.isdir(iso_vm_Path) and file.split(".")[0] not in ignored_vms:
         vm_name = file.split(".")[0]
         os_type = vm_name.split("_")[0]
         print(os_type)
@@ -74,7 +82,7 @@ for file in os.listdir(iso_path):
 
             ## Create the VM
             write_to_log(f"Create vm {vm_name}")
-            request = ["./Vm11Creator", vm_name, isoPath, path_os_vdi, os_type + "_64"]
+            request = ["./Vm11Creator", vm_name, iso_vm_Path, path_os_vdi, os_type + "_64"]
             subprocess.call(request)
 
             ## Install the iso

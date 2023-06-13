@@ -9,6 +9,7 @@ The goal of this repository is to get the hash of all files in a Windows machine
 - [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads)
 - virtualBox guest addition
   - `sudo apt-get install virtualbox-guest-additions-iso`
+  - `sudo apt install virtualbox-ext-pack`
 - ssdeep
   - On Ubuntu:
     - `sudo apt-get install build-essential libffi-dev python3 python3-dev python3-pip libfuzzy-dev`
@@ -36,3 +37,13 @@ The first step, is to create VM from iso file.
 - Run `bin/VmUnattended.py`
 
 VM will be created using the script `bin/Vm11Creator`
+
+
+
+
+
+## Windows server
+
+```po
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+```
