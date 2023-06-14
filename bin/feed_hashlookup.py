@@ -68,11 +68,11 @@ def get_all_hashes(vdi_folder, vm_path, vm_name, feeder_path, sysinfo_path):
     convert_file = f"{pathToConvert}/{vm_name}.img"
 
     print("## Conversion ##")
-    res = subprocess.call(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"])
-    while res.stderr:
+    res = subprocess.run(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"], capture_output=True)
+    while "Clone medium created in format" not in res.stdout.decode():
         print("[-] Conversion error")
         time.sleep(10)
-        res = subprocess.call(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"])
+        res = subprocess.run(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"], capture_output=True)
     print("## Conversion Finish ##\n")
 
     ## create mount directory
