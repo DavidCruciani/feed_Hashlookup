@@ -88,6 +88,7 @@ def api_check(iso_path, hashlookup_path, log_file):
     start_win_11 = False
     # start_win_2016 = False
     # start_win_2019 = False
+    flag_new_release = False
     try:
         response = requests.get("https://api.msrc.microsoft.com/cvrf/v2.0/updates", headers={"Accept": "application/json"})
         if response.status_code == 200:
@@ -99,14 +100,16 @@ def api_check(iso_path, hashlookup_path, log_file):
                     print(f"[+] New release: {api_current_release_date}")
                     current_release_date = api_current_release_date
                     start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    flag_new_release = True
                     break
                 elif api_initial_release_date > current_release_date:
                     print(f"[+] New release: {api_initial_release_date}")
                     current_release_date = api_initial_release_date
                     start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    flag_new_release = True
                     break
-                else:
-                    print(f"[*] No new Release {current_release_date}")
+        if not flag_new_release:
+            print(f"[*] No new Release {current_release_date}")
     except Exception as e:
         print(f"[-] Error: {e}")
         pass
