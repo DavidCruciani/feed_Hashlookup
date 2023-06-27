@@ -43,6 +43,28 @@ def html_to_json(content, indent=None):
     return json.dumps(data, indent=indent)
 
 
+def request_document(current_release_date, start_win_10, start_win_11):
+    request_date = current_release_date.strftime("%Y-%b")
+    response = requests.get(f"https://api.msrc.microsoft.com/cvrf/v2.0/document/{request_date}", headers={"Accept": "application/json"})
+    if response.status_code == 200:
+        html_data = response.json()["DocumentNotes"][0]["Value"]
+        soup = BeautifulSoup(html_data, "html.parser")
+        table = soup.find_all('table')
+        
+        os_applied = json.loads(html_to_json(str(table[-1])))
+        for update_info in os_applied:
+            if "Windows 10" in update_info["applies to"]:
+                start_win_10 = True
+            if "Windows 11" in update_info["applies to"]:
+                start_win_11 = True
+            # if "Windows Server 2016" in update_info["applies to"]:
+            #     start_win_2016 = True
+            # if "Windows Server 2019" in update_info["applies to"]:
+            #     start_win_2019 = True
+
+        return start_win_10, start_win_11
+
+
 def start_process_vm(os_type, iso_path, hashlookup_path, log_file):
     path_win_10 = os.path.join(iso_path, os_type)
     if os.path.isdir(path_win_10):
@@ -61,37 +83,30 @@ def start_process_vm(os_type, iso_path, hashlookup_path, log_file):
 
 
 def api_check(iso_path, hashlookup_path, log_file):
-    # current_release_date = datetime.datetime.strptime("2023-03-14T07:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
-    current_release_date = datetime.datetime.strptime("2023-05-23T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+    current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
     start_win_10 = False
     start_win_11 = False
-    start_win_2016 = False
-    start_win_2019 = False
+    # start_win_2016 = False
+    # start_win_2019 = False
     try:
         response = requests.get("https://api.msrc.microsoft.com/cvrf/v2.0/updates", headers={"Accept": "application/json"})
         if response.status_code == 200:
-            api_current_release_date = datetime.datetime.strptime(response.json()["value"][-1]["CurrentReleaseDate"], "%Y-%m-%dT%H:%M:%SZ")
-            if api_current_release_date > current_release_date:
-                print(f"[+] New release: {datetime.datetime.now()}")
-                current_release_date = api_current_release_date
-                response = requests.get("https://api.msrc.microsoft.com/cvrf/v2.0/document/2023-May", headers={"Accept": "application/json"})
-                if response.status_code == 200:
-                    html_data = response.json()["DocumentNotes"][0]["Value"]
-                    soup = BeautifulSoup(html_data, "html.parser")
-                    table = soup.find_all('table')
-                    
-                    os_applied = json.loads(html_to_json(str(table[-1])))
-                    for update_info in os_applied:
-                        if "Windows 10" in update_info["applies to"]:
-                            start_win_10 = True
-                        if "Windows 11" in update_info["applies to"]:
-                            start_win_11 = True
-                        if "Windows Server 2016" in update_info["applies to"]:
-                            start_win_2016 = True
-                        if "Windows Server 2019" in update_info["applies to"]:
-                            start_win_2019 = True
-            else:
-                print(f"[*] No new Release {current_release_date}")
+            for release_date in response.json()["value"]:
+                api_current_release_date = datetime.datetime.strptime(release_date["CurrentReleaseDate"], "%Y-%m-%dT%H:%M:%SZ")
+                api_initial_release_date = datetime.datetime.strptime(release_date["InitialReleaseDate"], "%Y-%m-%dT%H:%M:%SZ")
+
+                if api_current_release_date > current_release_date:
+                    print(f"[+] New release: {api_current_release_date}")
+                    current_release_date = api_current_release_date
+                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    break
+                elif api_initial_release_date > current_release_date:
+                    print(f"[+] New release: {api_initial_release_date}")
+                    current_release_date = api_initial_release_date
+                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    break
+                else:
+                    print(f"[*] No new Release {current_release_date}")
     except Exception as e:
         print(f"[-] Error: {e}")
         pass
@@ -103,9 +118,9 @@ def api_check(iso_path, hashlookup_path, log_file):
     if start_win_11:
         start_process_vm("Windows11", iso_path, hashlookup_path, log_file)
 
-    if start_win_2016:
-        start_process_vm("Windows2016", iso_path, hashlookup_path, log_file)
+    # if start_win_2016:
+    #     start_process_vm("Windows2016", iso_path, hashlookup_path, log_file)
 
-    if start_win_2019:
-        start_process_vm("Windows2019", iso_path, hashlookup_path, log_file)
+    # if start_win_2019:
+    #     start_process_vm("Windows2019", iso_path, hashlookup_path, log_file)
 

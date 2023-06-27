@@ -120,7 +120,7 @@ for file in os.listdir(iso_path):
             exit(1)
 
 
-
+print(f"[+] Finished at: {datetime.datetime.now()}")
 
 while True:
     api_check(iso_path, hashlookup_path, log_file)

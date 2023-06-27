@@ -18,7 +18,7 @@ def update_vm(vm_name, path_os_vdi, log_file, os_type, installation_flag=False):
     # if os_type == "Windows2016" or os_type == "Windows2019":
 
     if installation_flag:
-        command = '(Install-PackageProvider -Name NuGet -Force ); (Install-Module PSWindowsUpdate -Force); (Set-ExecutionPolicy Unrestricted -Force); (Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)'
+        command = '(Install-PackageProvider -Name NuGet -Force ); (Install-Module PSWindowsUpdate -Force); (Set-ExecutionPolicy Unrestricted -Force); (Import-Module PSWindowsUpdate); (Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)'
     else:
         command = "(Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)"
     request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", command]

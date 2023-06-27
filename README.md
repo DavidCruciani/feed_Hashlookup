@@ -19,6 +19,10 @@ The goal of this repository is to get the hash of all files in a Windows machine
 - BeautifulSoup4
 - requests
 
+- sleuth kit
+  
+  - `sudo apt install sleuthkit`
+
 ## Important
 
 Add in `win_postinstall` locate at : `/usr/share/virtualbox/UnattendedTemplates`
@@ -38,12 +42,8 @@ The first step, is to create VM from iso file.
 
 VM will be created using the script `bin/Vm11Creator`
 
-
-
-
-
 ## Windows server
 
-```po
+```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ```
