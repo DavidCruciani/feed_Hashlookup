@@ -3,6 +3,7 @@ import time
 import subprocess
 import configparser
 import datetime
+import argparse
 from feed_hashlookup import get_all_hashes
 from update_vm import update_vm
 from api_check import api_check
@@ -64,6 +65,13 @@ def runningVms():
 
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-w10", "--win10", help="Work with Windows 10 vms", action="store_true")
+parser.add_argument("-w11", "--win11", help="Work with Windows 11 vms", action="store_true")
+args = parser.parse_args()
+
+w10 = args.win10
+w11 = args.win11
 
 ## List all iso files
 for file in os.listdir(iso_path):
@@ -124,7 +132,7 @@ print(f"[+] Finished at: {datetime.datetime.now()}")
 
 current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 while True:
-    current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, log_file)
+    current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)
     print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
 
     time.sleep(43200) # 12 hours

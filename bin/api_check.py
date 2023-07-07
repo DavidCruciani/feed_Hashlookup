@@ -81,7 +81,7 @@ def start_process_vm(os_type, vdi_path, hashlookup_path, log_file):
 
 
 
-def api_check(current_release_date, vdi_path, hashlookup_path, log_file):
+def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file):
     start_win_10 = False
     start_win_11 = False
     # start_win_2016 = False
@@ -113,10 +113,10 @@ def api_check(current_release_date, vdi_path, hashlookup_path, log_file):
         pass
 
 
-    if start_win_10:
+    if start_win_10 and w10:
         start_process_vm("Windows10", vdi_path, hashlookup_path, log_file)
 
-    if start_win_11:
+    if start_win_11 and w11:
         start_process_vm("Windows11", vdi_path, hashlookup_path, log_file)
 
     # if start_win_2016:

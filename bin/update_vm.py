@@ -6,7 +6,7 @@ import datetime
 def write_to_log(log_file, msg):
     log_file.write(f"\n{datetime.datetime.now()}: {msg}")
 
-def update_vm(vm_name, path_os_vdi, log_file, os_type, installation_flag=False):
+def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
     print("[+] Start for update")
     write_to_log(log_file, f"Start {vm_name} for update")
     request = ["VBoxManage", "startvm", vm_name, "--type", "headless"]
