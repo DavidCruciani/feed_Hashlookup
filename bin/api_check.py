@@ -65,11 +65,10 @@ def request_document(current_release_date, start_win_10, start_win_11):
         return start_win_10, start_win_11
 
 
-def start_process_vm(os_type, iso_path, hashlookup_path, log_file):
-    path_win_10 = os.path.join(iso_path, os_type)
-    if os.path.isdir(path_win_10):
-        path_os_vdi = os.path.join(iso_path, os_type)
-        for vm_file in os.listdir(path_win_10):
+def start_process_vm(os_type, vdi_path, hashlookup_path, log_file):
+    path_os_vdi = os.path.join(vdi_path, os_type)
+    if os.path.isdir(path_os_vdi):
+        for vm_file in os.listdir(path_os_vdi):
             if vm_file.endswith(".vdi"):
                 vm_name = vm_file.split(".")[0]
                 update_vm(vm_name=vm_name, path_os_vdi=path_os_vdi, log_file=log_file)
@@ -82,8 +81,7 @@ def start_process_vm(os_type, iso_path, hashlookup_path, log_file):
 
 
 
-def api_check(iso_path, hashlookup_path, log_file):
-    current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+def api_check(current_release_date, vdi_path, hashlookup_path, log_file):
     start_win_10 = False
     start_win_11 = False
     # start_win_2016 = False
@@ -116,14 +114,15 @@ def api_check(iso_path, hashlookup_path, log_file):
 
 
     if start_win_10:
-        start_process_vm("Windows10", iso_path, hashlookup_path, log_file)
+        start_process_vm("Windows10", vdi_path, hashlookup_path, log_file)
 
     if start_win_11:
-        start_process_vm("Windows11", iso_path, hashlookup_path, log_file)
+        start_process_vm("Windows11", vdi_path, hashlookup_path, log_file)
 
     # if start_win_2016:
-    #     start_process_vm("Windows2016", iso_path, hashlookup_path, log_file)
+    #     start_process_vm("Windows2016", vdi_path, hashlookup_path, log_file)
 
     # if start_win_2019:
-    #     start_process_vm("Windows2019", iso_path, hashlookup_path, log_file)
+    #     start_process_vm("Windows2019", vdi_path, hashlookup_path, log_file)
 
+    return current_release_date

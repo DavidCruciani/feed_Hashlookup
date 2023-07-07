@@ -122,8 +122,9 @@ for file in os.listdir(iso_path):
 
 print(f"[+] Finished at: {datetime.datetime.now()}")
 
+current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 while True:
-    api_check(iso_path, hashlookup_path, log_file)
+    current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, log_file)
     print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
 
     time.sleep(43200) # 12 hours
