@@ -7,16 +7,24 @@ The goal of this repository is to get the hash of all files in a Windows machine
 ## Requirements
 
 - [VirtualBox](https://www.virtualbox.org/wiki/Linux_Downloads)
+
 - virtualBox guest addition
+  
   - `sudo apt-get install virtualbox-guest-additions-iso`
   - `sudo apt install virtualbox-ext-pack`
+
 - ssdeep
+  
   - On Ubuntu:
     - `sudo apt-get install build-essential libffi-dev python3 python3-dev python3-pip libfuzzy-dev`
     - `pip install ssdeep`
+
 - python-tlsh
+
 - ndjson
+
 - BeautifulSoup4
+
 - requests
 
 - sleuth kit

@@ -12,18 +12,33 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
     request = ["VBoxManage", "startvm", vm_name, "--type", "headless"]
     p = subprocess.Popen(request, stdout=subprocess.PIPE)
 
-    print("[+] Try to update...")
+    # Change password policy to put it as unlimited
+    # run whoami to see if the machine is logon
     need_wait = True
-    ## Execute all powershell commands needed to run updates
-    # if os_type == "Windows2016" or os_type == "Windows2019":
+    request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "whoami"]
+    while need_wait:
+        p = subprocess.run(request, capture_output=True)
+        if not len(p.stderr):
+            # Put password unlimited in time, no expiration
+            request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "net accounts /maxpwage:unlimited"]
+            print("[+] Set password expiration to unlimited")
+            p = subprocess.run(request, capture_output=True)
+            time.sleep(20)
+            need_wait = False
+        else:
+            print("[+] Waiting the VM to be usable...")
+            time.sleep(20)
 
+    print("[+] Try to update...")
+    ## Execute all powershell commands needed to run updates
+    need_wait = True
     if installation_flag:
         command = '(Install-PackageProvider -Name NuGet -Force ); (Install-Module PSWindowsUpdate -Force); (Set-ExecutionPolicy Unrestricted -Force); (Import-Module PSWindowsUpdate); (Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)'
     else:
         command = "(Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)"
     request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", command]
     while need_wait:
-        print(request)
+        print(command)
         p = subprocess.run(request, capture_output=True)
         if not len(p.stderr):
             print(f"[+] Updates done")
@@ -44,11 +59,9 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
         print(request)
         p = subprocess.run(request, capture_output=True)
         if not len(p.stderr):
-            # print(f"[+] Output: {p.stdout}")
             ## Get system information for hashlookup
             request_sysinfo = ["vboxmanage", "guestcontrol", vm_name, "run", "cmd.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "/c", "systeminfo"]
             s = subprocess.run(request_sysinfo, capture_output=True)
-            # print(s.stdout)
             try:
                 SystemVersion = s.stdout.decode("cp850").split("\n")[3]
                 SystemName = s.stdout.decode("cp850").split("\n")[2]
@@ -64,11 +77,13 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
 
             time.sleep(2)
             
+            # Shutdown the vm
             request_shutdown = ["vboxmanage", "guestcontrol", vm_name, "run", "cmd.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "/c", "shutdown /s /t 0"]
             p = subprocess.run(request_shutdown, capture_output=True)
 
             need_wait = False
         else:
+            # The user is not logon yet
             write_to_log(log_file, f"Error {vm_name}: {p.stderr}")
             print("[+] Waiting the VM to be usable...")
             time.sleep(20)
