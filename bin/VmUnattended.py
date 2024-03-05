@@ -114,7 +114,7 @@ for file in os.listdir(iso_path):
 
 
             ## Run again the VM to install updates
-            update_vm(vm_name=vm_name, path_os_vdi=path_os_vdi, log_file=log_file, os_type=os_type, installation_flag=True)
+            update_vm(vm_name=vm_name, path_os_vdi=path_os_vdi, log_file=log_file, installation_flag=True)
 
 
             ## Wait the VM to shutdown
