@@ -68,7 +68,8 @@ def runningVms():
 parser = argparse.ArgumentParser()
 parser.add_argument("-w10", "--win10", help="Work with Windows 10 vms", action="store_true")
 parser.add_argument("-w11", "--win11", help="Work with Windows 11 vms", action="store_true")
-parser.add_argument("-u", "--update_only", help="Work with Windows 11 vms", action="store_true")
+parser.add_argument("-u", "--update_only", help="Skip the creation part", action="store_true")
+parser.add_argument("-d", "--delete_all", help="Delete all vms", action="store_true")
 args = parser.parse_args()
 
 w10 = args.win10
@@ -77,71 +78,80 @@ if not w10 and not w11:
     print("[-] Need to choose windows 10 or windows 11")
     exit(1)
 
-if not args.update_only:
-    ## List all iso files
-    for file in os.listdir(iso_path):
-        iso_vm_Path = os.path.join(iso_path, file)
-        if not os.path.isdir(iso_vm_Path) and file.split(".")[0] not in ignored_vms:
+if args.delete_all:
+    for file in os.listdir(vdi_path):
+        vdi_vm_Path = os.path.join(vdi_path, file)
+        if file.endswith(".vdi"):
             vm_name = file.split(".")[0]
-            os_type = vm_name.split("_")[0]
-            print(os_type)
-            if os_type == "Windows10" or os_type == "Windows11" or os_type == "Windows2016" or os_type == "Windows2019":
-                ## Do the process for all VM
-                print(f"VM: {vm_name}")
 
-                path_os_vdi = os.path.join(vdi_path, os_type)
-                if not os.path.isdir(path_os_vdi):
-                    os.mkdir(path_os_vdi)
+            request = ["./Vm11Creator", vm_name, "del"]
+            subprocess.call(request)
+else:
+    if not args.update_only:
+        ## List all iso files
+        for file in os.listdir(iso_path):
+            iso_vm_Path = os.path.join(iso_path, file)
+            if not os.path.isdir(iso_vm_Path) and file.split(".")[0] not in ignored_vms:
+                vm_name = file.split(".")[0]
+                os_type = vm_name.split("_")[0]
+                print(os_type)
+                if os_type == "Windows10" or os_type == "Windows11" or os_type == "Windows2016" or os_type == "Windows2019":
+                    ## Do the process for all VM
+                    print(f"VM: {vm_name}")
 
-                ## Create the VM
-                write_to_log(f"Create vm {vm_name}")
-                request = ["./Vm11Creator", vm_name, iso_vm_Path, path_os_vdi, os_type + "_64"]
-                subprocess.call(request)
+                    path_os_vdi = os.path.join(vdi_path, os_type)
+                    if not os.path.isdir(path_os_vdi):
+                        os.mkdir(path_os_vdi)
 
-                ## Install the iso
-                print("[+] Windows Start")
-                write_to_log(f"Windows {vm_name} Start")
-                request = ["VBoxManage", "startvm", vm_name, "--type", "headless"]
-                p = subprocess.Popen(request, stdout=subprocess.PIPE)
-                (output, err) = p.communicate()
-                p_status = p.wait()
+                    ## Create the VM
+                    write_to_log(f"Create vm {vm_name}")
+                    request = ["./Vm11Creator", vm_name, iso_vm_Path, path_os_vdi, os_type + "_64"]
+                    subprocess.call(request)
 
-                ## Wait the VM to shutdown
-                res = runningVms()
-                cptime = 0
-                while vm_name in res.stdout.decode():
-                    time.sleep(180)
-                    cptime += 3
-                    print("\rTime spent: %s min" % (cptime), end="")
+                    ## Install the iso
+                    print("[+] Windows Start")
+                    write_to_log(f"Windows {vm_name} Start")
+                    request = ["VBoxManage", "startvm", vm_name, "--type", "headless"]
+                    p = subprocess.Popen(request, stdout=subprocess.PIPE)
+                    (output, err) = p.communicate()
+                    p_status = p.wait()
+
+                    ## Wait the VM to shutdown
                     res = runningVms()
-                print("\n[+] Windows stop\n")
-                write_to_log(f"Windows {vm_name} stop")
+                    cptime = 0
+                    while vm_name in res.stdout.decode():
+                        time.sleep(180)
+                        cptime += 3
+                        print("\rTime spent: %s min" % (cptime), end="")
+                        res = runningVms()
+                    print("\n[+] Windows stop\n")
+                    write_to_log(f"Windows {vm_name} stop")
 
 
-                ## Run again the VM to install updates
-                update_vm(vm_name=vm_name, path_os_vdi=path_os_vdi, log_file=log_file, installation_flag=True)
+                    ## Run again the VM to install updates
+                    update_vm(vm_name=vm_name, path_os_vdi=path_os_vdi, log_file=log_file, installation_flag=True)
 
 
-                ## Wait the VM to shutdown
-                res = runningVms()
-                while vm_name in res.stdout.decode():
-                    time.sleep(10)
+                    ## Wait the VM to shutdown
                     res = runningVms()
-                get_all_hashes(vdi_folder=path_os_vdi, vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", vm_name=vm_name, feeder_path=hashlookup_path, sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"))
-            else:
-                print(f"[-] Change the name of {vm_name}, Format: Windows10_en, Windows11_fr, Windows2016_de, Windows2019_it")
-                exit(1)
+                    while vm_name in res.stdout.decode():
+                        time.sleep(10)
+                        res = runningVms()
+                    get_all_hashes(vdi_folder=path_os_vdi, vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", vm_name=vm_name, feeder_path=hashlookup_path, sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"))
+                else:
+                    print(f"[-] Change the name of {vm_name}, Format: Windows10_en, Windows11_fr, Windows2016_de, Windows2019_it")
+                    exit(1)
 
 
-current_release_date = datetime.datetime.now()
-# current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+    current_release_date = datetime.datetime.now()
+    # current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
 
-print(f"[+] Finished at: {current_release_date}")
+    print(f"[+] Finished at: {current_release_date}")
 
-while True:
-    current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)
-    print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
+    while True:
+        current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)
+        print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
 
-    time.sleep(43200) # 12 hours
+        time.sleep(43200) # 12 hours
 
 log_file.close()
