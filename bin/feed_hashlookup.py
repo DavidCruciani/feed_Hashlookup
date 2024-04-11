@@ -69,6 +69,7 @@ def get_all_hashes(vdi_folder, vm_path, vm_name, feeder_path, sysinfo_path):
 
     print("## Conversion ##")
     res = subprocess.run(["VBoxManage", "clonehd", vm_path, convert_file, "--format", "raw"], capture_output=True)
+    print("...")
     while "Clone medium created in format" not in res.stdout.decode():
         print("[-] Conversion error... Retry in 10 sec")
         time.sleep(10)

@@ -134,9 +134,9 @@ if not args.update_only:
 
 
 current_release_date = datetime.datetime.now()
-print(f"[+] Finished at: {current_release_date}")
-
 # current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+
+print(f"[+] Finished at: {current_release_date}")
 
 while True:
     current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)

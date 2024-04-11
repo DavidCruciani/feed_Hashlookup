@@ -45,7 +45,7 @@ def html_to_json(content, indent=None):
 
 def request_document(current_release_date, start_win_10, start_win_11, retry = False):
     request_date = current_release_date.strftime("%Y-%b")
-    response = requests.get(f"https://api.msrc.microsoft.com/cvrf/v2.0/document/{request_date}", headers={"Accept": "application/json"})
+    response = requests.get(f"https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/{request_date}", headers={"Accept": "application/json"})
     flag_retry = True
     if response.status_code == 200:
         html_data = response.json()["DocumentNotes"][0]["Value"]
@@ -54,7 +54,7 @@ def request_document(current_release_date, start_win_10, start_win_11, retry = F
         
         os_applied = json.loads(html_to_json(str(table[-1])))
         for update_info in os_applied:
-            if "applies to" in os_applied:
+            if "applies to" in update_info:
                 flag_retry = False
                 if "Windows 10" in update_info["applies to"]:
                     start_win_10 = True
@@ -65,9 +65,14 @@ def request_document(current_release_date, start_win_10, start_win_11, retry = F
                 # if "Windows Server 2019" in update_info["applies to"]:
                 #     start_win_2019 = True
     else:
+        print("[-] Document not reached... Will retry in 3 seconds.")
+        print(response.status_code)
+        time.sleep(3)
         return request_document(current_release_date, start_win_10, start_win_11, retry=False)
 
     if flag_retry and retry:
+        print("[-] Error when reading document. Will retry in 3 seconds.")
+        time.sleep(3)
         return request_document(current_release_date, start_win_10, start_win_11, retry=False)
 
     return start_win_10, start_win_11
@@ -96,7 +101,8 @@ def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_fil
     # start_win_2019 = False
     flag_new_release = False
     try:
-        response = requests.get("https://api.msrc.microsoft.com/cvrf/v2.0/updates", headers={"Accept": "application/json"})
+        current_year = datetime.datetime.now().strftime("%Y")
+        response = requests.get(f"https://api.msrc.microsoft.com/cvrf/v3.0/updates('{current_year}')", headers={"Accept": "application/json"})
         if response.status_code == 200:
             for release_date in response.json()["value"]:
                 api_current_release_date = datetime.datetime.strptime(release_date["CurrentReleaseDate"], "%Y-%m-%dT%H:%M:%SZ")
