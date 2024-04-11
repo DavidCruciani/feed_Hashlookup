@@ -43,9 +43,10 @@ def html_to_json(content, indent=None):
     return json.dumps(data, indent=indent)
 
 
-def request_document(current_release_date, start_win_10, start_win_11):
+def request_document(current_release_date, start_win_10, start_win_11, retry = False):
     request_date = current_release_date.strftime("%Y-%b")
     response = requests.get(f"https://api.msrc.microsoft.com/cvrf/v2.0/document/{request_date}", headers={"Accept": "application/json"})
+    flag_retry = True
     if response.status_code == 200:
         html_data = response.json()["DocumentNotes"][0]["Value"]
         soup = BeautifulSoup(html_data, "html.parser")
@@ -53,16 +54,23 @@ def request_document(current_release_date, start_win_10, start_win_11):
         
         os_applied = json.loads(html_to_json(str(table[-1])))
         for update_info in os_applied:
-            if "Windows 10" in update_info["applies to"]:
-                start_win_10 = True
-            if "Windows 11" in update_info["applies to"]:
-                start_win_11 = True
-            # if "Windows Server 2016" in update_info["applies to"]:
-            #     start_win_2016 = True
-            # if "Windows Server 2019" in update_info["applies to"]:
-            #     start_win_2019 = True
+            if "applies to" in os_applied:
+                flag_retry = False
+                if "Windows 10" in update_info["applies to"]:
+                    start_win_10 = True
+                if "Windows 11" in update_info["applies to"]:
+                    start_win_11 = True
+                # if "Windows Server 2016" in update_info["applies to"]:
+                #     start_win_2016 = True
+                # if "Windows Server 2019" in update_info["applies to"]:
+                #     start_win_2019 = True
+    else:
+        return request_document(current_release_date, start_win_10, start_win_11, retry=False)
 
-        return start_win_10, start_win_11
+    if flag_retry and retry:
+        return request_document(current_release_date, start_win_10, start_win_11, retry=False)
+
+    return start_win_10, start_win_11
 
 
 def start_process_vm(os_type, vdi_path, hashlookup_path, log_file):
@@ -97,13 +105,13 @@ def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_fil
                 if api_current_release_date > current_release_date:
                     print(f"[+] New release: {api_current_release_date}")
                     current_release_date = api_current_release_date
-                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11, retry=True)
                     flag_new_release = True
                     break
                 elif api_initial_release_date > current_release_date:
                     print(f"[+] New release: {api_initial_release_date}")
                     current_release_date = api_initial_release_date
-                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11)
+                    start_win_10, start_win_11 = request_document(current_release_date, start_win_10, start_win_11, retry=True)
                     flag_new_release = True
                     break
         if not flag_new_release:
