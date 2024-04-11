@@ -14,20 +14,21 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
 
     # Change password policy to put it as unlimited
     # run whoami to see if the machine is logon
-    need_wait = True
-    request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "whoami"]
-    while need_wait:
-        p = subprocess.run(request, capture_output=True)
-        if not len(p.stderr):
-            # Put password unlimited in time, no expiration
-            request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "net accounts /maxpwage:unlimited"]
-            print("[+] Set password expiration to unlimited")
+    if installation_flag:
+        need_wait = True
+        request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "whoami"]
+        while need_wait:
             p = subprocess.run(request, capture_output=True)
-            time.sleep(20)
-            need_wait = False
-        else:
-            print("[+] Waiting the VM to be usable...")
-            time.sleep(20)
+            if not len(p.stderr):
+                # Put password unlimited in time, no expiration
+                request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", "net accounts /maxpwage:unlimited"]
+                print("[+] Set password expiration to unlimited")
+                p = subprocess.run(request, capture_output=True)
+                time.sleep(20)
+                need_wait = False
+            else:
+                print("[+] Waiting the VM to be usable...")
+                time.sleep(20)
 
     print("[+] Try to update...")
     ## Execute all powershell commands needed to run updates

@@ -72,6 +72,9 @@ args = parser.parse_args()
 
 w10 = args.win10
 w11 = args.win11
+if not w10 and not w11:
+    print("[-] Need to choose windows 10 or windows 11")
+    exit(1)
 
 ## List all iso files
 for file in os.listdir(iso_path):
@@ -128,9 +131,11 @@ for file in os.listdir(iso_path):
             exit(1)
 
 
-print(f"[+] Finished at: {datetime.datetime.now()}")
+current_release_date = datetime.datetime.now()
+print(f"[+] Finished at: {current_release_date}")
 
-current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+# current_release_date = datetime.datetime.strptime("2023-06-27T01:00:00Z", "%Y-%m-%dT%H:%M:%SZ")
+
 while True:
     current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)
     print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
