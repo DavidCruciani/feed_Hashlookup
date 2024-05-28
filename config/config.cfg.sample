@@ -4,3 +4,8 @@ vdi_path =
 
 [hashlookup]
 path = 
+
+[bloomfilter]
+path = 
+capacity = 600000
+false_probability = 0.1

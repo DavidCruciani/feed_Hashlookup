@@ -30,7 +30,7 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
                 print("[+] Waiting the VM to be usable...")
                 time.sleep(20)
 
-    print("[+] Try to update...")
+    print(f"[+] Try to update... ({datetime.datetime.now()})")
     ## Execute all powershell commands needed to run updates
     need_wait = True
     if installation_flag:
@@ -38,11 +38,13 @@ def update_vm(vm_name, path_os_vdi, log_file, installation_flag=False):
     else:
         command = "(Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)"
     request = ["vboxmanage", "guestcontrol", vm_name, "run", "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "--username", "John", "--password", "John", "--wait-stdout", "--", "-command", command]
+    # vboxmanage guestcontrol Windows10_ run C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe --username John --password John --wait-stdout -- -command
+    # "(Install-PackageProvider -Name NuGet -Force ); (Install-Module PSWindowsUpdate -Force); (Set-ExecutionPolicy Unrestricted -Force); (Import-Module PSWindowsUpdate); (Get-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot)"
     while need_wait:
         print(command)
         p = subprocess.run(request, capture_output=True)
         if not len(p.stderr):
-            print(f"[+] Updates done")
+            print(f"[+] Updates done ({datetime.datetime.now()})")
             need_wait = False
         else:
             write_to_log(log_file, f"Error {vm_name}: {p.stderr}")

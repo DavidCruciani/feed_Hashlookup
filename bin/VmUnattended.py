@@ -27,6 +27,12 @@ else:
 if "hashlookup" in config:
     hashlookup_path = config["hashlookup"]["path"]
 
+if "bloomfilter" in config:
+    bloom_filter_info = {}
+    bloom_filter_info["path"] = config["bloomfilter"]["path"]
+    bloom_filter_info["capacity"] = config["bloomfilter"]["capacity"]
+    bloom_filter_info["false_probability"] = config["bloomfilter"]["false_probability"]
+
 if not os.path.isdir(hashlookup_path):
     os.mkdir(hashlookup_path)
 
@@ -70,6 +76,7 @@ parser.add_argument("-w10", "--win10", help="Work with Windows 10 vms", action="
 parser.add_argument("-w11", "--win11", help="Work with Windows 11 vms", action="store_true")
 parser.add_argument("-u", "--update_only", help="Skip the creation part", action="store_true")
 parser.add_argument("-d", "--delete_all", help="Delete all vms", action="store_true")
+parser.add_argument("-b", "--bloom_filter", help="Use bloom filter", action="store_true")
 args = parser.parse_args()
 
 w10 = args.win10
@@ -77,6 +84,8 @@ w11 = args.win11
 if not w10 and not w11:
     print("[-] Need to choose windows 10 or windows 11")
     exit(1)
+
+bloom_filter_info["active"] = args.bloom_filter
 
 if args.delete_all:
     for file in os.listdir(vdi_path):
@@ -137,7 +146,12 @@ else:
                     while vm_name in res.stdout.decode():
                         time.sleep(10)
                         res = runningVms()
-                    get_all_hashes(vdi_folder=path_os_vdi, vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", vm_name=vm_name, feeder_path=hashlookup_path, sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"))
+                    get_all_hashes(vdi_folder=path_os_vdi, 
+                                   vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", 
+                                   vm_name=vm_name, 
+                                   feeder_path=hashlookup_path, 
+                                   sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"),
+                                   bloom_filter_info=bloom_filter_info )
                 else:
                     print(f"[-] Change the name of {vm_name}, Format: Windows10_en, Windows11_fr, Windows2016_de, Windows2019_it")
                     exit(1)
@@ -149,7 +163,7 @@ else:
     print(f"[+] Finished at: {current_release_date}")
 
     while True:
-        current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file)
+        current_release_date = api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file, bloom_filter_info)
         print(f"[+] {datetime.datetime.now()}: Waiting for 12 hours for a new check")
 
         time.sleep(43200) # 12 hours

@@ -31,6 +31,10 @@ The goal of this repository is to get the hash of all files in a Windows machine
   
   - `sudo apt install sleuthkit`
 
+##### Optional
+
+- [poppy](https://github.com/hashlookup/poppy/tree/main/python)
+
 ## Important
 
 Add in `win_postinstall` locate at : `/usr/share/virtualbox/UnattendedTemplates`

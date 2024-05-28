@@ -78,7 +78,7 @@ def request_document(current_release_date, start_win_10, start_win_11, retry = F
     return start_win_10, start_win_11
 
 
-def start_process_vm(os_type, vdi_path, hashlookup_path, log_file):
+def start_process_vm(os_type, vdi_path, hashlookup_path, log_file, bloom_filter_info):
     path_os_vdi = os.path.join(vdi_path, os_type)
     if os.path.isdir(path_os_vdi):
         for vm_file in os.listdir(path_os_vdi):
@@ -90,11 +90,16 @@ def start_process_vm(os_type, vdi_path, hashlookup_path, log_file):
                 while vm_name in res.stdout.decode():
                     time.sleep(10)
                     res = runningVms()
-                get_all_hashes(vdi_folder=path_os_vdi, vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", vm_name=vm_name, feeder_path=hashlookup_path, sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"))
+                get_all_hashes(vdi_folder=path_os_vdi, 
+                               vm_path=f"{os.path.join(path_os_vdi, vm_name)}.vdi", 
+                               vm_name=vm_name, 
+                               feeder_path=hashlookup_path, 
+                               sysinfo_path=os.path.join(path_os_vdi, f"sysinfo_{vm_name}"),
+                               bloom_filter_info=bloom_filter_info)
 
 
 
-def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file):
+def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_file, bloom_filter_info):
     start_win_10 = False
     start_win_11 = False
     # start_win_2016 = False
@@ -128,10 +133,10 @@ def api_check(current_release_date, vdi_path, hashlookup_path, w10, w11, log_fil
 
 
     if start_win_10 and w10:
-        start_process_vm("Windows10", vdi_path, hashlookup_path, log_file)
+        start_process_vm("Windows10", vdi_path, hashlookup_path, log_file, bloom_filter_info)
 
     if start_win_11 and w11:
-        start_process_vm("Windows11", vdi_path, hashlookup_path, log_file)
+        start_process_vm("Windows11", vdi_path, hashlookup_path, log_file, bloom_filter_info)
 
     # if start_win_2016:
     #     start_process_vm("Windows2016", vdi_path, hashlookup_path, log_file)
